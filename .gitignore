@@ -1,0 +1,35 @@
+# Dependencias
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+
+# Sesiones de WhatsApp
+sessions/
+.wwebjs_auth/
+.wwebjs_cache/
+
+# Variables de entorno
+.env
+.env.local
+.env.production
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# IDEs
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Logs
+logs/
+*.log
+
+# Archivos temporales
+tmp/
+temp/

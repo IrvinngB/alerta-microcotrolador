@@ -1,0 +1,33 @@
+# Dependencias de Node
+node_modules
+npm-debug.log
+yarn-error.log
+
+# Sesiones de WhatsApp (se manejan con volúmenes)
+sessions/
+.wwebjs_auth/
+.wwebjs_cache/
+
+# Archivos de desarrollo
+.git
+.gitignore
+.env
+.env.local
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Archivos de IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# Archivos de prueba
+test/
+*.test.js
+
+# Documentación
+README.md
+docs/

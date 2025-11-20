@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  canaletaguard:
+    build: .
+    container_name: canaletaguard-bot
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      # Persistir sesiones de WhatsApp
+      - ./sessions:/app/sessions
+      # Persistir configuración
+      - ./config.json:/app/config.json
+    environment:
+      - NODE_ENV=production
+    # Configuración de seguridad
+    security_opt:
+      - no-new-privileges:true
+    # Límites de recursos (opcional)
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
