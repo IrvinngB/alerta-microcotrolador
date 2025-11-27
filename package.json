@@ -4,8 +4,8 @@
     "description": "WhatsApp Bot para notificaciones desde microcontrolador",
     "main": "index.js",
     "scripts": {
-        "start": "node index.js",
-        "dev": "nodemon index.js"
+        "start": "node --expose-gc index.js",
+        "dev": "nodemon --expose-gc index.js"
     },
     "keywords": [
         "whatsapp",
@@ -19,7 +19,8 @@
         "express": "^4.18.2",
         "whatsapp-web.js": "^1.23.0",
         "qrcode": "^1.5.3",
-        "cors": "^2.8.5"
+        "cors": "^2.8.5",
+        "axios": "^1.6.0"
     },
     "devDependencies": {
         "nodemon": "^3.0.1"

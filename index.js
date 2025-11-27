@@ -4,9 +4,12 @@ const qrcode = require('qrcode');
 const fs = require('fs');
 const path = require('path');
 const cors = require('cors');
+const KeepAlive = require('./utils/keepAlive');
+const MemoryOptimizer = require('./utils/memoryOptimizer');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
+const APP_URL = process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`;
 
 // Middleware
 app.use(cors());
@@ -17,6 +20,19 @@ app.use(express.static('public'));
 let qrCodeData = null;
 let isClientReady = false;
 let client = null;
+
+// Inicializar optimizador de memoria
+const memoryOptimizer = new MemoryOptimizer({
+    maxMemoryMB: 450,
+    checkIntervalMs: 60000,
+    gcThresholdPercent: 75
+});
+
+// Inicializar keep-alive (solo en producción)
+let keepAlive = null;
+if (process.env.NODE_ENV === 'production' && process.env.RENDER_EXTERNAL_URL) {
+    keepAlive = new KeepAlive(APP_URL, 10);
+}
 
 // Inicializar cliente de WhatsApp
 const initializeWhatsAppClient = () => {
@@ -55,7 +71,9 @@ const initializeWhatsAppClient = () => {
     client.on('ready', () => {
         console.log('✅ Cliente de WhatsApp listo!');
         isClientReady = true;
-        qrCodeData = null; // Limpiar QR cuando está conectado
+        qrCodeData = null;
+        
+        memoryOptimizer.optimizeWhatsAppClient(client);
     });
 
     // Evento: Autenticación exitosa
@@ -170,6 +188,34 @@ app.get('/status', (req, res) => {
     });
 });
 
+// GET /health - Health check para keep-alive
+app.get('/health', (req, res) => {
+    const memoryUsage = memoryOptimizer.getMemoryUsage();
+    res.json({
+        status: 'ok',
+        uptime: process.uptime(),
+        memory: memoryUsage,
+        whatsapp: isClientReady ? 'connected' : 'disconnected',
+        timestamp: new Date().toISOString()
+    });
+});
+
+// GET /stats - Estadísticas del sistema
+app.get('/stats', (req, res) => {
+    const memoryStats = memoryOptimizer.getStats();
+    const keepAliveStatus = keepAlive ? keepAlive.getStatus() : null;
+    
+    res.json({
+        memory: memoryStats,
+        keepAlive: keepAliveStatus,
+        whatsapp: {
+            connected: isClientReady,
+            hasQR: !!qrCodeData
+        },
+        uptime: process.uptime()
+    });
+});
+
 // POST /send - Enviar mensaje manual
 app.post('/send', async (req, res) => {
     const { numero, mensaje } = req.body;
@@ -270,7 +316,34 @@ app.post('/config', (req, res) => {
 // ==================== INICIAR SERVIDOR ====================
 
 app.listen(PORT, () => {
-    console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
+    console.log(`🚀 Servidor corriendo en ${APP_URL}`);
     console.log(`📱 Inicializando cliente de WhatsApp...`);
+    
     initializeWhatsAppClient();
+    
+    memoryOptimizer.startMonitoring();
+    console.log('📊 Monitoreo de memoria activado');
+    
+    if (keepAlive) {
+        setTimeout(() => {
+            keepAlive.start();
+            console.log('💚 Keep-alive activado');
+        }, 30000);
+    }
+});
+
+process.on('SIGTERM', () => {
+    console.log('🛑 SIGTERM recibido, cerrando servidor...');
+    memoryOptimizer.stopMonitoring();
+    if (keepAlive) keepAlive.stop();
+    if (client) client.destroy();
+    process.exit(0);
+});
+
+process.on('SIGINT', () => {
+    console.log('🛑 SIGINT recibido, cerrando servidor...');
+    memoryOptimizer.stopMonitoring();
+    if (keepAlive) keepAlive.stop();
+    if (client) client.destroy();
+    process.exit(0);
 });
