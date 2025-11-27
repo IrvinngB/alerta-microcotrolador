@@ -1,5 +1,6 @@
 // API Base URL
 const API_URL = '';
+let lastQRCode = null;
 
 // Navigation
 function showView(viewName) {
@@ -58,6 +59,11 @@ document.addEventListener('DOMContentLoaded', () => {
 async function loadConfig() {
     try {
         const response = await fetch(`${API_URL}/config`);
+        
+        if (!response.ok) {
+            throw new Error(`Error del servidor: ${response.status} ${response.statusText}`);
+        }
+        
         const config = await response.json();
 
         const numeroInput = document.getElementById('numero');
@@ -93,6 +99,10 @@ async function saveConfig() {
             })
         });
 
+        if (!response.ok) {
+            throw new Error(`Error del servidor: ${response.status} ${response.statusText}`);
+        }
+
         const result = await response.json();
 
         if (result.success) {
@@ -111,6 +121,11 @@ async function saveConfig() {
 async function checkStatus() {
     try {
         const response = await fetch(`${API_URL}/status`);
+        
+        if (!response.ok) {
+            throw new Error(`Servidor no disponible (${response.status})`);
+        }
+        
         const data = await response.json();
 
         const statusBadge = document.getElementById('status-badge');
@@ -131,7 +146,7 @@ async function checkStatus() {
         const statusBadge = document.getElementById('status-badge');
         const statusText = document.getElementById('status-text');
         if (statusBadge) statusBadge.className = 'px-6 py-3 rounded-full font-bold text-white flex items-center space-x-2 shadow-lg bg-gray-600';
-        if (statusText) statusText.textContent = 'Error de conexión';
+        if (statusText) statusText.textContent = 'Servidor no disponible';
     }
 }
 
@@ -141,12 +156,18 @@ async function checkStatus() {
 async function loadQR() {
     try {
         const response = await fetch(`${API_URL}/qr`);
+        
+        if (!response.ok) {
+            throw new Error(`Servidor no disponible (${response.status})`);
+        }
+        
         const data = await response.json();
 
         const qrContainer = document.getElementById('qr-container');
         if (!qrContainer) return;
 
         if (data.connected) {
+            lastQRCode = null;
             qrContainer.innerHTML = `
                 <div class="text-center">
                     <div class="text-8xl mb-4">✅</div>
@@ -155,8 +176,20 @@ async function loadQR() {
                 </div>
             `;
         } else if (data.qr) {
+            const qrChanged = lastQRCode && lastQRCode !== data.qr;
+            
+            if (qrChanged) {
+                showQRChangeNotification();
+            }
+            
+            lastQRCode = data.qr;
+            
             qrContainer.innerHTML = `
-                <img src="${data.qr}" alt="Código QR de WhatsApp" class="max-w-full h-auto rounded-lg shadow-lg">
+                <div class="text-center">
+                    ${qrChanged ? '<div class="mb-4 px-4 py-2 bg-blue-100 text-blue-800 rounded-lg font-semibold animate-pulse">🔄 Nuevo código QR generado</div>' : ''}
+                    <img src="${data.qr}" alt="Código QR de WhatsApp" class="max-w-full h-auto rounded-lg shadow-lg transition-all duration-300">
+                    <p class="text-gray-600 text-sm mt-3">Escanea este código con WhatsApp</p>
+                </div>
             `;
         } else {
             qrContainer.innerHTML = `
@@ -173,10 +206,13 @@ async function loadQR() {
         if (qrContainer) {
             qrContainer.innerHTML = `
                 <div class="text-center">
-                    <div class="text-6xl mb-4">❌</div>
-                    <p class="text-xl font-bold text-red-600 mb-2">Error de Conexión</p>
-                    <p class="text-gray-600">No se pudo conectar con el servidor</p>
-                    <p class="text-gray-500 text-sm mt-2">Asegúrate de que el servidor esté corriendo</p>
+                    <div class="text-6xl mb-4">⚠️</div>
+                    <p class="text-xl font-bold text-orange-600 mb-2">Servidor No Disponible</p>
+                    <p class="text-gray-600">El servidor en Render puede estar iniciándose</p>
+                    <p class="text-gray-500 text-sm mt-2">Esto puede tomar 1-2 minutos en servicios gratuitos</p>
+                    <div class="mt-4">
+                        <div class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-orange-500"></div>
+                    </div>
                 </div>
             `;
         }
@@ -202,6 +238,10 @@ async function testMicrocontroller() {
             })
         });
 
+        if (!response.ok) {
+            throw new Error(`Error del servidor: ${response.status} ${response.statusText}`);
+        }
+
         const result = await response.json();
 
         if (result.success) {
@@ -215,6 +255,24 @@ async function testMicrocontroller() {
 }
 
 // ==================== UTILITY FUNCTIONS ====================
+
+// Show QR change notification
+function showQRChangeNotification() {
+    const notification = document.createElement('div');
+    notification.className = 'fixed top-4 right-4 bg-blue-600 text-white px-6 py-4 rounded-lg shadow-2xl font-bold flex items-center space-x-3 z-50 animate-bounce';
+    notification.innerHTML = `
+        <span class="text-2xl">🔄</span>
+        <span>¡Nuevo código QR disponible!</span>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.style.transition = 'opacity 0.5s';
+        notification.style.opacity = '0';
+        setTimeout(() => notification.remove(), 500);
+    }, 3000);
+}
 
 // Show status message with Tailwind styling
 function showStatusMessage(element, message, type) {
