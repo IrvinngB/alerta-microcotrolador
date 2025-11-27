@@ -6,6 +6,7 @@ const path = require('path');
 const cors = require('cors');
 const KeepAlive = require('./utils/keepAlive');
 const MemoryOptimizer = require('./utils/memoryOptimizer');
+const MQTTClientHandler = require('./utils/mqttClient');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -33,6 +34,15 @@ let keepAlive = null;
 if (process.env.NODE_ENV === 'production' && process.env.RENDER_EXTERNAL_URL) {
     keepAlive = new KeepAlive(APP_URL, 10);
 }
+
+// Inicializar cliente MQTT
+const mqttClient = new MQTTClientHandler({
+    broker: process.env.MQTT_BROKER || 'mqtt://test.mosquitto.org',
+    topic: process.env.MQTT_TOPIC || 'canaleta/alerta',
+    clientId: `nodejs-hydrowatch-${Math.random().toString(16).slice(2, 8)}`
+});
+
+let lastAlertTime = 0;
 
 // Inicializar cliente de WhatsApp
 const initializeWhatsAppClient = () => {
@@ -74,6 +84,28 @@ const initializeWhatsAppClient = () => {
         qrCodeData = null;
         
         memoryOptimizer.optimizeWhatsAppClient(client);
+    });
+
+    // Evento: Mensaje recibido (para comandos)
+    client.on('message', async (msg) => {
+        const config = readConfig();
+        const msgBody = msg.body.toLowerCase().trim();
+        
+        if (msgBody === config.comando_desactivar.toLowerCase()) {
+            config.alertas_activas = false;
+            saveConfig(config);
+            await msg.reply('❌ Alertas desactivadas. Envía "' + config.comando_activar + '" para reactivarlas.');
+            console.log('🔕 Alertas desactivadas por comando de WhatsApp');
+        } else if (msgBody === config.comando_activar.toLowerCase()) {
+            config.alertas_activas = true;
+            saveConfig(config);
+            await msg.reply('✅ Alertas activadas. Recibirás notificaciones cuando el nivel sea crítico.');
+            console.log('🔔 Alertas activadas por comando de WhatsApp');
+        } else if (msgBody === 'estado' || msgBody === 'status') {
+            const estado = config.alertas_activas ? '✅ Activas' : '❌ Desactivadas';
+            const cooldown = config.cooldown_minutos || 5;
+            await msg.reply(`📊 Estado del sistema:\n\nAlertas: ${estado}\nCooldown: ${cooldown} minutos\n\nComandos:\n- ${config.comando_activar}\n- ${config.comando_desactivar}\n- estado`);
+        }
     });
 
     // Evento: Autenticación exitosa
@@ -204,10 +236,12 @@ app.get('/health', (req, res) => {
 app.get('/stats', (req, res) => {
     const memoryStats = memoryOptimizer.getStats();
     const keepAliveStatus = keepAlive ? keepAlive.getStatus() : null;
+    const mqttStatus = mqttClient.getStatus();
     
     res.json({
         memory: memoryStats,
         keepAlive: keepAliveStatus,
+        mqtt: mqttStatus,
         whatsapp: {
             connected: isClientReady,
             hasQR: !!qrCodeData
@@ -287,7 +321,7 @@ app.get('/config', (req, res) => {
 
 // POST /config - Actualizar configuración
 app.post('/config', (req, res) => {
-    const { numero_destino, mensaje } = req.body;
+    const { numero_destino, mensaje, cooldown_minutos, alertas_activas, comando_activar, comando_desactivar } = req.body;
 
     if (!numero_destino || !mensaje) {
         return res.status(400).json({
@@ -296,7 +330,14 @@ app.post('/config', (req, res) => {
         });
     }
 
-    const config = { numero_destino, mensaje };
+    const config = { 
+        numero_destino, 
+        mensaje,
+        cooldown_minutos: cooldown_minutos || 5,
+        alertas_activas: alertas_activas !== false,
+        comando_activar: comando_activar || 'activar alertas',
+        comando_desactivar: comando_desactivar || 'desactivar alertas'
+    };
     const saved = saveConfig(config);
 
     if (saved) {
@@ -313,6 +354,48 @@ app.post('/config', (req, res) => {
     }
 });
 
+// ==================== MQTT HANDLER ====================
+
+mqttClient.onMessage(async (topic, message) => {
+    console.log(`📡 Mensaje MQTT recibido: ${message}`);
+    
+    if (message === 'true') {
+        try {
+            const config = readConfig();
+            
+            if (!config.alertas_activas) {
+                console.log('🔕 Alertas desactivadas, ignorando mensaje MQTT');
+                return;
+            }
+            
+            const cooldownMs = (config.cooldown_minutos || 5) * 60 * 1000;
+            const now = Date.now();
+            
+            if (now - lastAlertTime < cooldownMs) {
+                const minutosRestantes = Math.ceil((cooldownMs - (now - lastAlertTime)) / 60000);
+                console.log(`⏱️ Alerta en cooldown (${minutosRestantes} min restantes)`);
+                return;
+            }
+            
+            if (!config.numero_destino || !config.mensaje) {
+                console.error('⚠️ Configuración incompleta');
+                return;
+            }
+            
+            if (!isClientReady) {
+                console.error('⚠️ WhatsApp no está conectado');
+                return;
+            }
+            
+            lastAlertTime = now;
+            await sendWhatsAppMessage(config.numero_destino, config.mensaje);
+            console.log(`✅ Alerta enviada por MQTT (próxima en ${config.cooldown_minutos} min)`);
+        } catch (error) {
+            console.error('❌ Error enviando alerta MQTT:', error);
+        }
+    }
+});
+
 // ==================== INICIAR SERVIDOR ====================
 
 app.listen(PORT, () => {
@@ -323,6 +406,9 @@ app.listen(PORT, () => {
     
     memoryOptimizer.startMonitoring();
     console.log('📊 Monitoreo de memoria activado');
+    
+    mqttClient.connect();
+    console.log('📡 Cliente MQTT iniciado');
     
     if (keepAlive) {
         setTimeout(() => {
@@ -336,6 +422,7 @@ process.on('SIGTERM', () => {
     console.log('🛑 SIGTERM recibido, cerrando servidor...');
     memoryOptimizer.stopMonitoring();
     if (keepAlive) keepAlive.stop();
+    mqttClient.disconnect();
     if (client) client.destroy();
     process.exit(0);
 });
@@ -344,6 +431,7 @@ process.on('SIGINT', () => {
     console.log('🛑 SIGINT recibido, cerrando servidor...');
     memoryOptimizer.stopMonitoring();
     if (keepAlive) keepAlive.stop();
+    mqttClient.disconnect();
     if (client) client.destroy();
     process.exit(0);
 });

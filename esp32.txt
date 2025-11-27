@@ -1,0 +1,65 @@
+import network
+import time
+from machine import Pin, ADC, time_pulse_us
+from umqtt.simple import MQTTClient
+
+# ---- WiFi ----
+SSID = "Starlink Web"
+PASSWORD = "wrpnaTDD0426"
+
+# ---- MQTT ----
+BROKER = "test.mosquitto.org"
+CLIENT_ID = "esp32-canaleta"
+TOPIC = b"canaleta/alerta"
+
+# ---- Ultrasónico ----
+TRIG = Pin(5, Pin.OUT)
+ECHO = Pin(18, Pin.IN)
+
+# ---- Sensor rojito ----
+agua = ADC(Pin(34))
+agua.atten(ADC.ATTN_11DB)
+
+ALTURA = 10     # cm
+UMBRAL = 0.70   # 70%
+
+def wifi():
+    w = network.WLAN(network.STA_IF)
+    w.active(True)
+    w.connect(SSID, PASSWORD)
+    while not w.isconnected():
+        time.sleep(0.3)
+
+def distancia_cm():
+    TRIG.value(0)
+    time.sleep_us(2)
+    TRIG.value(1)
+    time.sleep_us(10)
+    TRIG.value(0)
+    t = time_pulse_us(ECHO, 1, 30000)
+    if t < 0:
+        return None
+    return (t / 2) * 0.0343
+
+def main():
+    wifi()
+    client = MQTTClient(CLIENT_ID, BROKER)
+    client.connect()
+
+    while True:
+        d = distancia_cm()
+        if d is None:
+            time.sleep(1)
+            continue
+
+        nivel = max(0, ALTURA - d)
+        porc = nivel / ALTURA
+
+        if porc >= UMBRAL:
+            client.publish(TOPIC, b"true")
+        else:
+            client.publish(TOPIC, b"false")
+
+        time.sleep(3)
+
+main()

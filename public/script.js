@@ -68,9 +68,13 @@ async function loadConfig() {
 
         const numeroInput = document.getElementById('numero');
         const mensajeInput = document.getElementById('mensaje');
+        const cooldownInput = document.getElementById('cooldown');
+        const alertasActivasInput = document.getElementById('alertas-activas');
 
         if (numeroInput) numeroInput.value = config.numero_destino || '';
         if (mensajeInput) mensajeInput.value = config.mensaje || '';
+        if (cooldownInput) cooldownInput.value = config.cooldown_minutos || 5;
+        if (alertasActivasInput) alertasActivasInput.checked = config.alertas_activas !== false;
     } catch (error) {
         console.error('Error cargando configuración:', error);
     }
@@ -80,10 +84,17 @@ async function loadConfig() {
 async function saveConfig() {
     const numero = document.getElementById('numero').value.trim();
     const mensaje = document.getElementById('mensaje').value.trim();
+    const cooldown = parseInt(document.getElementById('cooldown').value) || 5;
+    const alertasActivas = document.getElementById('alertas-activas').checked;
     const statusDiv = document.getElementById('config-status');
 
     if (!numero || !mensaje) {
         showStatusMessage(statusDiv, 'Por favor complete todos los campos', 'error');
+        return;
+    }
+
+    if (cooldown < 1 || cooldown > 60) {
+        showStatusMessage(statusDiv, 'El cooldown debe estar entre 1 y 60 minutos', 'error');
         return;
     }
 
@@ -95,7 +106,11 @@ async function saveConfig() {
             },
             body: JSON.stringify({
                 numero_destino: numero,
-                mensaje: mensaje
+                mensaje: mensaje,
+                cooldown_minutos: cooldown,
+                alertas_activas: alertasActivas,
+                comando_activar: 'activar alertas',
+                comando_desactivar: 'desactivar alertas'
             })
         });
 

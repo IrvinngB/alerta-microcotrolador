@@ -1,4 +1,8 @@
 {
   "numero_destino": "+50763615832",
-  "mensaje": "Alerta desde el microcontrolador"
+  "mensaje": "⚠️ ALERTA: La canaleta está por desbordarse. Revisa y limpia inmediatamente.",
+  "alertas_activas": true,
+  "cooldown_minutos": 5,
+  "comando_activar": "activar alertas",
+  "comando_desactivar": "desactivar alertas"
 }
