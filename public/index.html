@@ -114,6 +114,15 @@
                         </svg>
                         <span>Vincular WhatsApp</span>
                     </button>
+                    <button onclick="showView('docs')" id="nav-docs"
+                        class="nav-link px-6 py-3 text-gray-700 hover:text-blue-600 font-semibold transition-all duration-200 rounded-lg hover:bg-blue-50 flex items-center space-x-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253">
+                            </path>
+                        </svg>
+                        <span>Documentación</span>
+                    </button>
                 </div>
 
                 <!-- Mobile Menu Button -->
@@ -160,6 +169,15 @@
                         </path>
                     </svg>
                     <span>Vincular WhatsApp</span>
+                </button>
+                <button onclick="showView('docs'); toggleMobileMenu()"
+                    class="block w-full text-left px-4 py-3 text-gray-700 hover:bg-blue-500 hover:text-white rounded-lg font-semibold transition-colors flex items-center space-x-3">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253">
+                        </path>
+                    </svg>
+                    <span>Documentación</span>
                 </button>
             </div>
         </div>
@@ -649,21 +667,19 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
                             </path>
-                        </svg>
-                        <span>Refrescar Código QR</span>
-                    </button>
                 </div>
-            </div>
-        </section>
 
-    </main>
-
-    <!-- FOOTER -->
-    <footer class="bg-gradient-to-r from-blue-900 to-emerald-900 text-white py-8">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-6">
-                <p class="text-lg font-semibold mb-2">HydroWatch - Sistema Inteligente de Monitoreo</p>
-                <p class="text-white/70">Protección inteligente para tu hogar</p>
+                <!-- Mensaje -->
+                <div>
+                    <label for="mensaje" class="block text-sm font-bold text-gray-700 mb-2">
+                        Mensaje de Alerta
+                    </label>
+                    <textarea id="mensaje" rows="5"
+                        placeholder="⚠️ ALERTA: La canaleta está por desbordarse. Revisa y limpia inmediatamente."
+                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-light focus:border-transparent transition-all outline-none text-lg resize-none"></textarea>
+                    <p class="mt-2 text-sm text-gray-500">
+                        Este mensaje se enviará cuando el sensor detecte nivel crítico de agua
+                    </p>
             </div>
             <div class="border-t border-white/20 pt-6">
                 <p class="text-center text-white/60 text-sm mb-3">Desarrollado por:</p>

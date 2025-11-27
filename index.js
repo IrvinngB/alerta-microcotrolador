@@ -60,8 +60,16 @@ const initializeWhatsAppClient = () => {
                 '--disable-accelerated-2d-canvas',
                 '--no-first-run',
                 '--no-zygote',
-                '--disable-gpu'
+                '--disable-gpu',
+                '--disable-extensions',
+                '--disable-background-timer-throttling',
+                '--disable-backgrounding-occluded-windows',
+                '--disable-renderer-backgrounding'
             ]
+        },
+        webVersionCache: {
+            type: 'remote',
+            remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.2412.54.html'
         }
     });
 
@@ -84,6 +92,19 @@ const initializeWhatsAppClient = () => {
         qrCodeData = null;
         
         memoryOptimizer.optimizeWhatsAppClient(client);
+    });
+
+    // Evento: Desconexión
+    client.on('disconnected', (reason) => {
+        console.log('❌ Cliente desconectado:', reason);
+        isClientReady = false;
+        qrCodeData = null;
+    });
+
+    // Evento: Error de autenticación
+    client.on('auth_failure', (msg) => {
+        console.error('❌ Fallo de autenticación:', msg);
+        isClientReady = false;
     });
 
     // Evento: Mensaje recibido (para comandos)
@@ -130,6 +151,37 @@ const initializeWhatsAppClient = () => {
     client.initialize();
 };
 
+// Función helper para enviar mensajes con reintentos
+const sendWhatsAppMessageSafe = async (numero, mensaje, maxRetries = 3) => {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+            if (!isClientReady || !client) {
+                throw new Error('Cliente de WhatsApp no está listo');
+            }
+            
+            const chatId = numero.includes('@c.us') ? numero : `${numero}@c.us`;
+            await client.sendMessage(chatId, mensaje);
+            console.log(`✅ Mensaje enviado a ${numero}`);
+            return true;
+        } catch (error) {
+            console.error(`❌ Intento ${attempt}/${maxRetries} falló:`, error.message);
+            
+            if (error.message.includes('Execution context was destroyed')) {
+                console.log('⚠️ Contexto destruido, esperando 2 segundos...');
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                if (attempt === maxRetries) {
+                    console.error('❌ Todos los intentos fallaron. El mensaje no se envió.');
+                    return false;
+                }
+            } else {
+                throw error;
+            }
+        }
+    }
+    return false;
+};
+
 // Función para leer configuración
 const readConfig = () => {
     try {
@@ -168,7 +220,7 @@ const formatPhoneNumber = (number) => {
     return formatted.substring(1) + '@c.us';
 };
 
-// Función para enviar mensaje
+// Función para enviar mensaje (usa la versión segura con reintentos)
 const sendWhatsAppMessage = async (numero, mensaje) => {
     if (!isClientReady) {
         throw new Error('Cliente de WhatsApp no está listo');
@@ -176,9 +228,7 @@ const sendWhatsAppMessage = async (numero, mensaje) => {
 
     try {
         const chatId = formatPhoneNumber(numero);
-        await client.sendMessage(chatId, mensaje);
-        console.log(`✅ Mensaje enviado a ${numero}`);
-        return true;
+        return await sendWhatsAppMessageSafe(chatId, mensaje);
     } catch (error) {
         console.error('Error enviando mensaje:', error);
         throw error;
@@ -425,6 +475,24 @@ process.on('SIGTERM', () => {
     mqttClient.disconnect();
     if (client) client.destroy();
     process.exit(0);
+});
+
+// Manejadores de errores globales
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('❌ Unhandled Rejection:', reason);
+    if (reason && reason.message && reason.message.includes('Execution context was destroyed')) {
+        console.log('⚠️ Error de contexto de Puppeteer detectado, continuando...');
+    }
+});
+
+process.on('uncaughtException', (error) => {
+    console.error('❌ Uncaught Exception:', error);
+    if (error.message && error.message.includes('Execution context was destroyed')) {
+        console.log('⚠️ Error de contexto de Puppeteer detectado, continuando...');
+    } else {
+        console.error('❌ Error crítico, reiniciando en 5 segundos...');
+        setTimeout(() => process.exit(1), 5000);
+    }
 });
 
 process.on('SIGINT', () => {
