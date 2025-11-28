@@ -3,7 +3,7 @@ const mqtt = require('mqtt');
 class MQTTClientHandler {
     constructor(options = {}) {
         this.broker = options.broker || 'mqtt://test.mosquitto.org';
-        this.topic = options.topic || 'canaleta/alerta';
+        this.topic = options.topic || 'alerta/sensor';
         this.clientId = options.clientId || `nodejs-${Math.random().toString(16).slice(2, 8)}`;
         this.client = null;
         this.isConnected = false;
@@ -29,24 +29,43 @@ class MQTTClientHandler {
             this.isConnected = true;
             this.reconnectAttempts = 0;
             
-            this.client.subscribe(this.topic, (err) => {
-                if (err) {
-                    console.error('❌ Error suscribiéndose al topic:', err);
-                } else {
-                    console.log(`📡 Suscrito al topic: ${this.topic}`);
-                }
+            const topics = [this.topic, 'canaleta/alerta', 'alerta/#'];
+            
+            topics.forEach(t => {
+                this.client.subscribe(t, (err) => {
+                    if (err) {
+                        console.error(`❌ Error suscribiéndose a ${t}:`, err);
+                    } else {
+                        console.log(`📡 Suscrito al topic: ${t}`);
+                    }
+                });
             });
+            
+            console.log('👂 Esperando mensajes MQTT...');
         });
 
         this.client.on('message', (topic, message) => {
-            const msg = message.toString();
+            const msg = message.toString().trim().toLowerCase();
+            const timestamp = new Date().toLocaleTimeString();
+            
             this.lastMessage = {
                 topic,
                 message: msg,
                 timestamp: new Date()
             };
             
-            console.log(`📨 Mensaje recibido [${topic}]: ${msg}`);
+            console.log(`\n${'='.repeat(50)}`);
+            console.log(`📨 [${timestamp}] MENSAJE MQTT RECIBIDO`);
+            console.log(`   Topic: ${topic}`);
+            console.log(`   Mensaje: "${msg}"`);
+            console.log(`   Longitud: ${msg.length} caracteres`);
+            
+            if (msg === 'true') {
+                console.log(`🚨 ¡ALERTA DETECTADA! Valor: true`);
+            } else {
+                console.log(`ℹ️  Mensaje recibido (no es alerta): "${msg}"`);
+            }
+            console.log(`${'='.repeat(50)}\n`);
             
             if (this.messageCallback) {
                 this.messageCallback(topic, msg);

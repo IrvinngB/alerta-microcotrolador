@@ -46,4 +46,3 @@ while True:
         send_alert()
 
     time.sleep(1)
-

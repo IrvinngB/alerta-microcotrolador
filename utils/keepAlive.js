@@ -1,7 +1,7 @@
 const axios = require('axios');
 
 class KeepAlive {
-    constructor(url, intervalMinutes = 10) {
+    constructor(url, intervalMinutes = 2) {
         this.url = url;
         this.interval = intervalMinutes * 60 * 1000;
         this.timer = null;

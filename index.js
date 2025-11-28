@@ -407,14 +407,19 @@ app.post('/config', (req, res) => {
 // ==================== MQTT HANDLER ====================
 
 mqttClient.onMessage(async (topic, message) => {
-    console.log(`📡 Mensaje MQTT recibido: ${message}`);
+    const timestamp = new Date().toLocaleTimeString();
+    console.log(`\n🔔 [${timestamp}] PROCESANDO MENSAJE MQTT`);
+    console.log(`   Topic: ${topic}`);
+    console.log(`   Contenido: "${message}"`);
     
     if (message === 'true') {
+        console.log(`🚨 ¡ALERTA TRUE RECIBIDA DEL ESP32!`);
+        
         try {
             const config = readConfig();
             
             if (!config.alertas_activas) {
-                console.log('🔕 Alertas desactivadas, ignorando mensaje MQTT');
+                console.log('🔕 Alertas desactivadas en configuración, ignorando');
                 return;
             }
             
@@ -423,26 +428,33 @@ mqttClient.onMessage(async (topic, message) => {
             
             if (now - lastAlertTime < cooldownMs) {
                 const minutosRestantes = Math.ceil((cooldownMs - (now - lastAlertTime)) / 60000);
-                console.log(`⏱️ Alerta en cooldown (${minutosRestantes} min restantes)`);
+                console.log(`⏱️ Cooldown activo (${minutosRestantes} min restantes)`);
                 return;
             }
             
             if (!config.numero_destino || !config.mensaje) {
-                console.error('⚠️ Configuración incompleta');
+                console.log('⚠️ Configuración incompleta:');
+                console.log(`   Número: ${config.numero_destino || 'NO CONFIGURADO'}`);
+                console.log(`   Mensaje: ${config.mensaje ? 'OK' : 'NO CONFIGURADO'}`);
                 return;
             }
             
             if (!isClientReady) {
-                console.error('⚠️ WhatsApp no está conectado');
+                console.log('⚠️ WhatsApp NO conectado - Alerta registrada pero no enviada');
+                console.log(`   Número destino: ${config.numero_destino}`);
+                console.log(`   Mensaje: ${config.mensaje.substring(0, 50)}...`);
+                lastAlertTime = now;
                 return;
             }
             
             lastAlertTime = now;
             await sendWhatsAppMessage(config.numero_destino, config.mensaje);
-            console.log(`✅ Alerta enviada por MQTT (próxima en ${config.cooldown_minutos} min)`);
+            console.log(`✅ Alerta enviada por WhatsApp (próxima en ${config.cooldown_minutos} min)`);
         } catch (error) {
-            console.error('❌ Error enviando alerta MQTT:', error);
+            console.error('❌ Error procesando alerta:', error.message);
         }
+    } else {
+        console.log(`ℹ️ Mensaje ignorado (no es "true"): "${message}"`);
     }
 });
 

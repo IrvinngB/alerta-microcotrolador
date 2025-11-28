@@ -667,19 +667,217 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
                             </path>
+                        </svg>
+                        <span>Actualizar QR</span>
+                    </button>
                 </div>
+            </div>
+        </section>
 
-                <!-- Mensaje -->
-                <div>
-                    <label for="mensaje" class="block text-sm font-bold text-gray-700 mb-2">
-                        Mensaje de Alerta
-                    </label>
-                    <textarea id="mensaje" rows="5"
-                        placeholder="⚠️ ALERTA: La canaleta está por desbordarse. Revisa y limpia inmediatamente."
-                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-light focus:border-transparent transition-all outline-none text-lg resize-none"></textarea>
-                    <p class="mt-2 text-sm text-gray-500">
-                        Este mensaje se enviará cuando el sensor detecte nivel crítico de agua
-                    </p>
+        <!-- DOCS VIEW - DOCUMENTACIÓN -->
+        <section id="docs-view" class="view-section">
+            <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                <div class="bg-white rounded-2xl shadow-2xl p-8 md:p-12">
+                    <div class="text-center mb-10">
+                        <div class="inline-block p-4 bg-primary-light/10 rounded-full mb-4">
+                            <svg class="w-16 h-16 text-primary-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253">
+                                </path>
+                            </svg>
+                        </div>
+                        <h2 class="text-4xl font-bold text-primary-dark mb-2">Documentación</h2>
+                        <p class="text-gray-600">Guía completa del sistema HydroWatch</p>
+                    </div>
+
+                    <!-- Comandos de WhatsApp -->
+                    <div class="mb-10">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                            <svg class="w-7 h-7 mr-3 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
+                            </svg>
+                            Comandos por WhatsApp
+                        </h3>
+                        <p class="text-gray-600 mb-6">Controla el sistema directamente desde tu WhatsApp enviando estos comandos:</p>
+
+                        <div class="grid md:grid-cols-3 gap-6">
+                            <!-- Comando Activar -->
+                            <div class="bg-emerald-50 border-2 border-emerald-200 rounded-xl p-6">
+                                <div class="flex items-center mb-3">
+                                    <span class="text-2xl mr-2">✅</span>
+                                    <h4 class="font-bold text-emerald-800 text-lg">Activar Alertas</h4>
+                                </div>
+                                <code class="block bg-emerald-100 text-emerald-800 px-3 py-2 rounded-lg font-mono text-sm mb-3">activar alertas</code>
+                                <p class="text-gray-600 text-sm">Reactiva las notificaciones del sistema. Recibirás alertas cuando el nivel sea crítico.</p>
+                            </div>
+
+                            <!-- Comando Desactivar -->
+                            <div class="bg-red-50 border-2 border-red-200 rounded-xl p-6">
+                                <div class="flex items-center mb-3">
+                                    <span class="text-2xl mr-2">❌</span>
+                                    <h4 class="font-bold text-red-800 text-lg">Desactivar Alertas</h4>
+                                </div>
+                                <code class="block bg-red-100 text-red-800 px-3 py-2 rounded-lg font-mono text-sm mb-3">desactivar alertas</code>
+                                <p class="text-gray-600 text-sm">Desactiva las notificaciones. Útil durante mantenimiento o limpieza de canaletas.</p>
+                            </div>
+
+                            <!-- Comando Estado -->
+                            <div class="bg-blue-50 border-2 border-blue-200 rounded-xl p-6">
+                                <div class="flex items-center mb-3">
+                                    <span class="text-2xl mr-2">📊</span>
+                                    <h4 class="font-bold text-blue-800 text-lg">Ver Estado</h4>
+                                </div>
+                                <code class="block bg-blue-100 text-blue-800 px-3 py-2 rounded-lg font-mono text-sm mb-3">estado</code>
+                                <p class="text-gray-600 text-sm">Muestra el estado actual del sistema, configuración de cooldown y comandos disponibles.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Casos de Uso -->
+                    <div class="mb-10">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                            <svg class="w-7 h-7 mr-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                            </svg>
+                            Casos de Uso
+                        </h3>
+
+                        <div class="space-y-4">
+                            <div class="bg-gray-50 rounded-xl p-6">
+                                <h4 class="font-bold text-gray-800 mb-3">Limpieza de Canaletas</h4>
+                                <div class="bg-gray-800 text-gray-100 rounded-lg p-4 font-mono text-sm">
+                                    <p class="text-emerald-400">Usuario: "desactivar alertas"</p>
+                                    <p class="text-gray-400">Bot: ❌ Alertas desactivadas...</p>
+                                    <p class="text-gray-500 my-2">[Usuario limpia la canaleta]</p>
+                                    <p class="text-emerald-400">Usuario: "activar alertas"</p>
+                                    <p class="text-gray-400">Bot: ✅ Alertas activadas...</p>
+                                </div>
+                            </div>
+
+                            <div class="bg-gray-50 rounded-xl p-6">
+                                <h4 class="font-bold text-gray-800 mb-3">Temporada Seca</h4>
+                                <p class="text-gray-600">Durante meses sin lluvia, desactiva las alertas para evitar notificaciones innecesarias. Reactívalas al inicio de la temporada lluviosa.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Configuración del Sistema -->
+                    <div class="mb-10">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                            <svg class="w-7 h-7 mr-3 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            Configuración del Sistema
+                        </h3>
+
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div class="bg-purple-50 border-2 border-purple-200 rounded-xl p-6">
+                                <h4 class="font-bold text-purple-800 mb-3">Cooldown</h4>
+                                <ul class="text-gray-600 space-y-2 text-sm">
+                                    <li><strong>Rango:</strong> 1-60 minutos</li>
+                                    <li><strong>Recomendado:</strong> 5-10 minutos</li>
+                                    <li><strong>Propósito:</strong> Evitar spam de alertas repetidas</li>
+                                </ul>
+                            </div>
+
+                            <div class="bg-purple-50 border-2 border-purple-200 rounded-xl p-6">
+                                <h4 class="font-bold text-purple-800 mb-3">Persistencia</h4>
+                                <ul class="text-gray-600 space-y-2 text-sm">
+                                    <li>El estado se guarda en <code class="bg-purple-100 px-1 rounded">config.json</code></li>
+                                    <li>Se mantiene después de reiniciar el servidor</li>
+                                    <li>Sincronizado entre web y WhatsApp</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Arquitectura del Sistema -->
+                    <div class="mb-10">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                            <svg class="w-7 h-7 mr-3 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                            </svg>
+                            Arquitectura del Sistema
+                        </h3>
+
+                        <div class="bg-orange-50 border-2 border-orange-200 rounded-xl p-6">
+                            <div class="flex flex-wrap justify-center items-center gap-4 text-center">
+                                <div class="bg-white rounded-lg p-4 shadow-md">
+                                    <div class="text-3xl mb-2">📡</div>
+                                    <p class="font-bold text-gray-800">ESP32</p>
+                                    <p class="text-xs text-gray-500">Sensor de nivel</p>
+                                </div>
+                                <div class="text-2xl text-orange-400">→</div>
+                                <div class="bg-white rounded-lg p-4 shadow-md">
+                                    <div class="text-3xl mb-2">🌐</div>
+                                    <p class="font-bold text-gray-800">MQTT</p>
+                                    <p class="text-xs text-gray-500">Broker público</p>
+                                </div>
+                                <div class="text-2xl text-orange-400">→</div>
+                                <div class="bg-white rounded-lg p-4 shadow-md">
+                                    <div class="text-3xl mb-2">🖥️</div>
+                                    <p class="font-bold text-gray-800">Servidor Node.js</p>
+                                    <p class="text-xs text-gray-500">Procesamiento</p>
+                                </div>
+                                <div class="text-2xl text-orange-400">→</div>
+                                <div class="bg-white rounded-lg p-4 shadow-md">
+                                    <div class="text-3xl mb-2">📱</div>
+                                    <p class="font-bold text-gray-800">WhatsApp</p>
+                                    <p class="text-xs text-gray-500">Notificaciones</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Troubleshooting -->
+                    <div>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                            <svg class="w-7 h-7 mr-3 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                            </svg>
+                            Solución de Problemas
+                        </h3>
+
+                        <div class="space-y-4">
+                            <div class="bg-red-50 border-l-4 border-red-400 p-4 rounded-r-lg">
+                                <h4 class="font-bold text-red-800 mb-2">Los comandos no funcionan</h4>
+                                <ul class="text-gray-600 text-sm space-y-1">
+                                    <li>• Verifica que WhatsApp esté conectado (sección QR)</li>
+                                    <li>• Confirma que estás usando el número configurado</li>
+                                    <li>• Revisa que los comandos estén escritos correctamente</li>
+                                </ul>
+                            </div>
+
+                            <div class="bg-red-50 border-l-4 border-red-400 p-4 rounded-r-lg">
+                                <h4 class="font-bold text-red-800 mb-2">Las alertas siguen llegando después de desactivar</h4>
+                                <ul class="text-gray-600 text-sm space-y-1">
+                                    <li>• Espera unos segundos para que se sincronice</li>
+                                    <li>• Verifica el estado con el comando <code class="bg-red-100 px-1 rounded">estado</code></li>
+                                </ul>
+                            </div>
+
+                            <div class="bg-red-50 border-l-4 border-red-400 p-4 rounded-r-lg">
+                                <h4 class="font-bold text-red-800 mb-2">No recibo respuesta del bot</h4>
+                                <ul class="text-gray-600 text-sm space-y-1">
+                                    <li>• Verifica conexión de WhatsApp en la sección QR</li>
+                                    <li>• Confirma que el servidor esté corriendo</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-gradient-to-r from-primary-dark to-primary-medium text-white py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-6">
+                <h3 class="text-2xl font-bold mb-2">HydroWatch</h3>
+                <p class="text-white/80">Sistema Inteligente de Monitoreo de Canaletas</p>
             </div>
             <div class="border-t border-white/20 pt-6">
                 <p class="text-center text-white/60 text-sm mb-3">Desarrollado por:</p>
