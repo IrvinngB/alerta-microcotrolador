@@ -21,12 +21,14 @@ app.use(express.static('public'));
 let qrCodeData = null;
 let isClientReady = false;
 let client = null;
+let qrAttempts = 0;
+const MAX_QR_ATTEMPTS = 5;
 
-// Inicializar optimizador de memoria
+// Inicializar optimizador de memoria (límites estrictos para Render 512MB)
 const memoryOptimizer = new MemoryOptimizer({
-    maxMemoryMB: 450,
-    checkIntervalMs: 60000,
-    gcThresholdPercent: 75
+    maxMemoryMB: 380,
+    checkIntervalMs: 30000,
+    gcThresholdPercent: 55
 });
 
 // Inicializar keep-alive (solo en producción)
@@ -50,6 +52,8 @@ const initializeWhatsAppClient = () => {
         authStrategy: new LocalAuth({
             dataPath: './sessions'
         }),
+        qrMaxRetries: 3,
+        authTimeoutMs: 120000,
         puppeteer: {
             headless: true,
             executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
@@ -60,11 +64,21 @@ const initializeWhatsAppClient = () => {
                 '--disable-accelerated-2d-canvas',
                 '--no-first-run',
                 '--no-zygote',
+                '--single-process',
                 '--disable-gpu',
                 '--disable-extensions',
                 '--disable-background-timer-throttling',
                 '--disable-backgrounding-occluded-windows',
-                '--disable-renderer-backgrounding'
+                '--disable-renderer-backgrounding',
+                '--disable-software-rasterizer',
+                '--disable-translate',
+                '--disable-sync',
+                '--disable-default-apps',
+                '--mute-audio',
+                '--hide-scrollbars',
+                '--metrics-recording-only',
+                '--no-default-browser-check',
+                '--js-flags=--max-old-space-size=256'
             ]
         },
         webVersionCache: {
@@ -75,11 +89,17 @@ const initializeWhatsAppClient = () => {
 
     // Evento: QR generado
     client.on('qr', async (qr) => {
-        console.log('📱 QR Code generado');
-        qrCodeData = qr;
+        qrAttempts++;
+        console.log(`📱 QR Code generado (intento ${qrAttempts}/${MAX_QR_ATTEMPTS})`);
+        
+        if (qrAttempts > MAX_QR_ATTEMPTS) {
+            console.log('⚠️ Demasiados intentos de QR. Reinicia el servidor para generar uno nuevo.');
+            return;
+        }
+        
         try {
-            // Generar imagen QR en base64
             qrCodeData = await qrcode.toDataURL(qr);
+            console.log('📱 Escanea el QR en los próximos 60 segundos...');
         } catch (err) {
             console.error('Error generando QR:', err);
         }
@@ -407,54 +427,42 @@ app.post('/config', (req, res) => {
 // ==================== MQTT HANDLER ====================
 
 mqttClient.onMessage(async (topic, message) => {
-    const timestamp = new Date().toLocaleTimeString();
-    console.log(`\n🔔 [${timestamp}] PROCESANDO MENSAJE MQTT`);
-    console.log(`   Topic: ${topic}`);
-    console.log(`   Contenido: "${message}"`);
+    if (message !== 'true') return;
     
-    if (message === 'true') {
-        console.log(`🚨 ¡ALERTA TRUE RECIBIDA DEL ESP32!`);
+    console.log(`🚨 ALERTA ESP32 RECIBIDA`);
+    
+    try {
+        const config = readConfig();
         
-        try {
-            const config = readConfig();
-            
-            if (!config.alertas_activas) {
-                console.log('🔕 Alertas desactivadas en configuración, ignorando');
-                return;
-            }
-            
-            const cooldownMs = (config.cooldown_minutos || 5) * 60 * 1000;
-            const now = Date.now();
-            
-            if (now - lastAlertTime < cooldownMs) {
-                const minutosRestantes = Math.ceil((cooldownMs - (now - lastAlertTime)) / 60000);
-                console.log(`⏱️ Cooldown activo (${minutosRestantes} min restantes)`);
-                return;
-            }
-            
-            if (!config.numero_destino || !config.mensaje) {
-                console.log('⚠️ Configuración incompleta:');
-                console.log(`   Número: ${config.numero_destino || 'NO CONFIGURADO'}`);
-                console.log(`   Mensaje: ${config.mensaje ? 'OK' : 'NO CONFIGURADO'}`);
-                return;
-            }
-            
-            if (!isClientReady) {
-                console.log('⚠️ WhatsApp NO conectado - Alerta registrada pero no enviada');
-                console.log(`   Número destino: ${config.numero_destino}`);
-                console.log(`   Mensaje: ${config.mensaje.substring(0, 50)}...`);
-                lastAlertTime = now;
-                return;
-            }
-            
-            lastAlertTime = now;
-            await sendWhatsAppMessage(config.numero_destino, config.mensaje);
-            console.log(`✅ Alerta enviada por WhatsApp (próxima en ${config.cooldown_minutos} min)`);
-        } catch (error) {
-            console.error('❌ Error procesando alerta:', error.message);
+        if (!config.alertas_activas) {
+            console.log('🔕 Alertas OFF');
+            return;
         }
-    } else {
-        console.log(`ℹ️ Mensaje ignorado (no es "true"): "${message}"`);
+        
+        const cooldownMs = (config.cooldown_minutos || 5) * 60 * 1000;
+        const now = Date.now();
+        
+        if (now - lastAlertTime < cooldownMs) {
+            console.log(`⏱️ Cooldown activo`);
+            return;
+        }
+        
+        if (!config.numero_destino || !config.mensaje) {
+            console.log('⚠️ Config incompleta');
+            return;
+        }
+        
+        lastAlertTime = now;
+        
+        if (!isClientReady) {
+            console.log('⚠️ WhatsApp OFF - Alerta guardada');
+            return;
+        }
+        
+        await sendWhatsAppMessage(config.numero_destino, config.mensaje);
+        console.log(`✅ Alerta enviada`);
+    } catch (error) {
+        console.error('❌ Error:', error.message);
     }
 });
 

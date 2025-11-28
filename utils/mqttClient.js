@@ -46,26 +46,12 @@ class MQTTClientHandler {
 
         this.client.on('message', (topic, message) => {
             const msg = message.toString().trim().toLowerCase();
-            const timestamp = new Date().toLocaleTimeString();
             
-            this.lastMessage = {
-                topic,
-                message: msg,
-                timestamp: new Date()
-            };
-            
-            console.log(`\n${'='.repeat(50)}`);
-            console.log(`📨 [${timestamp}] MENSAJE MQTT RECIBIDO`);
-            console.log(`   Topic: ${topic}`);
-            console.log(`   Mensaje: "${msg}"`);
-            console.log(`   Longitud: ${msg.length} caracteres`);
+            this.lastMessage = { topic, message: msg, timestamp: new Date() };
             
             if (msg === 'true') {
-                console.log(`🚨 ¡ALERTA DETECTADA! Valor: true`);
-            } else {
-                console.log(`ℹ️  Mensaje recibido (no es alerta): "${msg}"`);
+                console.log(`🚨 [MQTT] ALERTA: ${topic} = true`);
             }
-            console.log(`${'='.repeat(50)}\n`);
             
             if (this.messageCallback) {
                 this.messageCallback(topic, msg);

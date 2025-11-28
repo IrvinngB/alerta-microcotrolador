@@ -1,8 +1,8 @@
 {
   "numero_destino": "+50763615832",
-  "mensaje": "⚠️ ALERTA: La canaleta está por desbordarse. Revisa y limpia inmediatamente.",
+  "mensaje": "ESTO FUNIONA MI REY, TAMOS LISTOS",
+  "cooldown_minutos": 1,
   "alertas_activas": true,
-  "cooldown_minutos": 5,
   "comando_activar": "activar alertas",
   "comando_desactivar": "desactivar alertas"
 }

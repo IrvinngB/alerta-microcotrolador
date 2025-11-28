@@ -1,8 +1,8 @@
 class MemoryOptimizer {
     constructor(options = {}) {
-        this.maxMemoryMB = options.maxMemoryMB || 450;
-        this.checkIntervalMs = options.checkIntervalMs || 30000;
-        this.gcThresholdPercent = options.gcThresholdPercent || 80;
+        this.maxMemoryMB = options.maxMemoryMB || 400;
+        this.checkIntervalMs = options.checkIntervalMs || 45000;
+        this.gcThresholdPercent = options.gcThresholdPercent || 60;
         this.timer = null;
         this.isMonitoring = false;
         this.stats = {
@@ -54,18 +54,13 @@ class MemoryOptimizer {
         console.log(`📊 Memoria: ${usage.heapUsed}MB/${this.maxMemoryMB}MB (${percent}%) | RSS: ${usage.rss}MB`);
 
         if (percent >= this.gcThresholdPercent) {
-            console.warn(`⚠️ Uso de memoria alto (${percent}%). Intentando liberar memoria...`);
-            
-            if (this.forceGarbageCollection()) {
-                this.stats.gcTriggered++;
-                const newUsage = this.getMemoryUsage();
-                const freed = usage.heapUsed - newUsage.heapUsed;
-                console.log(`✅ Memoria liberada: ${freed}MB (${newUsage.heapUsed}MB restantes)`);
-            }
+            this.forceGarbageCollection();
+            this.stats.gcTriggered++;
         }
 
-        if (percent >= 95) {
-            console.error('🚨 ALERTA: Memoria crítica! Considera reiniciar el servidor.');
+        if (percent >= 85) {
+            this.clearCache();
+            this.forceGarbageCollection();
         }
 
         return { usage, percent };

@@ -4,8 +4,8 @@
     "description": "WhatsApp Bot para notificaciones desde microcontrolador",
     "main": "index.js",
     "scripts": {
-        "start": "node --expose-gc index.js",
-        "dev": "nodemon --expose-gc index.js"
+        "start": "node --expose-gc --max-old-space-size=384 index.js",
+        "dev": "nodemon --expose-gc --max-old-space-size=384 index.js"
     },
     "keywords": [
         "whatsapp",
