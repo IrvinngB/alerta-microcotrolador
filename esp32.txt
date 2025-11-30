@@ -1,49 +1,66 @@
 from umqtt.simple import MQTTClient
-from machine import Pin, ADC
+from machine import Pin, ADC, time_pulse_us
 import time
 import network
 
-# ============= WIFI =============
+# ---- WIFI ----
 SSID = "Starlink Web"
 PASSWORD = "wrpnaTDD0426"
 
-# ============= MQTT =============
+# ---- MQTT ----
 BROKER = "test.mosquitto.org"
 PORT = 1883
 CLIENT_ID = "esp32-alerta"
 TOPIC = b"alerta/sensor"
 
-# ============= SENSOR =============
+# ---- Sensor humedad (ADC) ----
 sensor = ADC(Pin(34))
 sensor.atten(ADC.ATTN_11DB)
+
+# ---- Ultrasonido (TRIG listo, ECHO mañana) ----
+TRIG = Pin(5, Pin.OUT)
+# ECHO = Pin(18, Pin.IN)   # activar mañana
+
+def medir_distancia():
+    TRIG.off()
+    time.sleep_us(2)
+    TRIG.on()
+    time.sleep_us(10)
+    TRIG.off()
+
+    # activar mañana cuando esté el ECHO conectado con divisor:
+    # duracion = time_pulse_us(ECHO, 1, 30000)
+    # distancia = (duracion / 2) / 29.1
+    # return distancia
+
+    return None
 
 def connect_wifi():
     wlan = network.WLAN(network.STA_IF)
     wlan.active(True)
     wlan.connect(SSID, PASSWORD)
     while not wlan.isconnected():
-        print("Conectando WiFi...")
         time.sleep(1)
-    print("WiFi OK:", wlan.ifconfig())
 
 def send_alert():
     client = MQTTClient(CLIENT_ID, BROKER, PORT)
     client.connect()
-    print("MQTT conectado")
     client.publish(TOPIC, b"true")
-    print("Alerta enviada: true")
     client.disconnect()
 
-# ============= LOOP =============
 connect_wifi()
 
 while True:
     valor = sensor.read()
-    print("Valor sensor:", valor)
+    print("Humedad:", valor)
 
-    # Umbral de alerta (AJÚSTALO)
-    if valor > 2000:
+    if valor > 1500:
         send_alert()
 
-    time.sleep(1)
+    distancia = medir_distancia()
+    if distancia is not None:
+        print("Distancia:", distancia, "cm")
+        if distancia < 20:
+            send_alert()
 
+    time.sleep(1)
