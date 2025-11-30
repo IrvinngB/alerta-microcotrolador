@@ -40,7 +40,7 @@ if (process.env.NODE_ENV === 'production' && process.env.RENDER_EXTERNAL_URL) {
 // Inicializar cliente MQTT
 const mqttClient = new MQTTClientHandler({
     broker: process.env.MQTT_BROKER || 'mqtt://test.mosquitto.org',
-    topic: process.env.MQTT_TOPIC || 'canaleta/alerta',
+    topic: process.env.MQTT_TOPIC || 'alerta/canaleta',
     clientId: `nodejs-hydrowatch-${Math.random().toString(16).slice(2, 8)}`
 });
 
@@ -426,41 +426,83 @@ app.post('/config', (req, res) => {
 
 // ==================== MQTT HANDLER ====================
 
-mqttClient.onMessage(async (topic, message) => {
-    if (message !== 'true') return;
+const STATUS_NAMES = {
+    1: 'Normal',
+    2: 'Lluvia leve',
+    3: 'Acumulación',
+    4: 'Riesgo',
+    5: 'Emergencia',
+    6: 'Falla sensor',
+    7: 'Mantenimiento',
+    8: 'Obstrucción'
+};
+
+let lastStatus = 1;
+let lastAlertByLevel = {};
+
+mqttClient.onMessage(async (topic, raw, parsed) => {
+    if (!parsed || typeof parsed.status !== 'number') {
+        console.log('⚠️ Mensaje no válido');
+        return;
+    }
     
-    console.log(`🚨 ALERTA ESP32 RECIBIDA`);
+    const { status, humedad, distancia } = parsed;
+    const statusName = STATUS_NAMES[status] || 'Desconocido';
+    
+    console.log(`📊 Estado: ${status} (${statusName}) | Hum: ${humedad} | Dist: ${distancia}cm`);
+    
+    if (status !== lastStatus) {
+        console.log(`🔄 Cambio de estado: ${STATUS_NAMES[lastStatus]} → ${statusName}`);
+        lastStatus = status;
+    }
     
     try {
         const config = readConfig();
+        const nivelesNotificacion = config.niveles_notificacion || [3, 4, 5, 6];
+        
+        if (!nivelesNotificacion.includes(status)) {
+            return;
+        }
         
         if (!config.alertas_activas) {
             console.log('🔕 Alertas OFF');
             return;
         }
         
-        const cooldownMs = (config.cooldown_minutos || 5) * 60 * 1000;
+        const cooldownMinutos = config.cooldowns?.[status] || 5;
+        const cooldownMs = cooldownMinutos * 60 * 1000;
         const now = Date.now();
+        const lastAlertForThisLevel = lastAlertByLevel[status] || 0;
         
-        if (now - lastAlertTime < cooldownMs) {
-            console.log(`⏱️ Cooldown activo`);
+        if (now - lastAlertForThisLevel < cooldownMs) {
             return;
         }
         
-        if (!config.numero_destino || !config.mensaje) {
-            console.log('⚠️ Config incompleta');
+        if (!config.numero_destino) {
+            console.log('⚠️ Número no configurado');
             return;
         }
         
-        lastAlertTime = now;
+        const mensajeTemplate = config.mensajes?.[status] || `⚠️ Alerta nivel ${status}: ${statusName}`;
+        if (!mensajeTemplate) {
+            return;
+        }
+        
+        const mensaje = mensajeTemplate
+            .replace('{distancia}', distancia?.toFixed(1) || 'N/A')
+            .replace('{humedad}', humedad || 'N/A')
+            .replace('{status}', status)
+            .replace('{statusName}', statusName);
+        
+        lastAlertByLevel[status] = now;
         
         if (!isClientReady) {
-            console.log('⚠️ WhatsApp OFF - Alerta guardada');
+            console.log(`⚠️ WhatsApp OFF - ${statusName} registrado`);
             return;
         }
         
-        await sendWhatsAppMessage(config.numero_destino, config.mensaje);
-        console.log(`✅ Alerta enviada`);
+        await sendWhatsAppMessage(config.numero_destino, mensaje);
+        console.log(`✅ Alerta ${statusName} enviada`);
     } catch (error) {
         console.error('❌ Error:', error.message);
     }

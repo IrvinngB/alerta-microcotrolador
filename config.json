@@ -1,8 +1,22 @@
 {
   "numero_destino": "+50763615832",
-  "mensaje": "ESTO FUNIONA MI REY, TAMOS LISTOS",
   "cooldown_minutos": 1,
   "alertas_activas": true,
   "comando_activar": "activar alertas",
-  "comando_desactivar": "desactivar alertas"
+  "comando_desactivar": "desactivar alertas",
+  "mensajes": {
+    "3": "⚠️ *ACUMULACIÓN*\n\nEl nivel de agua está subiendo.\n\n📏 Distancia: {distancia}cm\n💧 Humedad: {humedad}\n\n_Mantente atento._",
+    "4": "🚨 *RIESGO*\n\n¡Nivel de agua alto!\n\n📏 Distancia: {distancia}cm\n💧 Humedad: {humedad}\n\n_Revisa la canaleta._",
+    "5": "🆘 *EMERGENCIA*\n\n¡NIVEL CRÍTICO!\n\n📏 Distancia: {distancia}cm\n💧 Humedad: {humedad}\n\n_¡Acción inmediata!_",
+    "6": "🔧 *FALLA SENSOR*\n\nDatos imposibles detectados.\n\n📏 Distancia: {distancia}cm\n💧 Humedad: {humedad}\n\n_Verifica el hardware._",
+    "8": "🚧 *OBSTRUCCIÓN*\n\nNivel alto pero humedad baja.\n\n📏 Distancia: {distancia}cm\n💧 Humedad: {humedad}\n\n_Posible bloqueo en la canaleta._"
+  },
+  "cooldowns": {
+    "3": 10,
+    "4": 5,
+    "5": 1,
+    "6": 30,
+    "8": 15
+  },
+  "niveles_notificacion": [3, 4, 5, 6, 8]
 }

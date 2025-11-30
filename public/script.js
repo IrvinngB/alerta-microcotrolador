@@ -67,14 +67,32 @@ async function loadConfig() {
         const config = await response.json();
 
         const numeroInput = document.getElementById('numero');
-        const mensajeInput = document.getElementById('mensaje');
         const cooldownInput = document.getElementById('cooldown');
         const alertasActivasInput = document.getElementById('alertas-activas');
 
         if (numeroInput) numeroInput.value = config.numero_destino || '';
-        if (mensajeInput) mensajeInput.value = config.mensaje || '';
         if (cooldownInput) cooldownInput.value = config.cooldown_minutos || 5;
         if (alertasActivasInput) alertasActivasInput.checked = config.alertas_activas !== false;
+
+        // Cargar mensajes y cooldowns por nivel
+        const niveles = [3, 4, 5, 6, 8];
+        if (config.mensajes) {
+            for (const nivel of niveles) {
+                const textarea = document.getElementById(`mensaje-${nivel}`);
+                if (textarea && config.mensajes[nivel]) {
+                    textarea.value = config.mensajes[nivel];
+                }
+            }
+        }
+        
+        if (config.cooldowns) {
+            for (const nivel of niveles) {
+                const input = document.getElementById(`cooldown-${nivel}`);
+                if (input && config.cooldowns[nivel]) {
+                    input.value = config.cooldowns[nivel];
+                }
+            }
+        }
     } catch (error) {
         console.error('Error cargando configuración:', error);
     }
@@ -83,18 +101,26 @@ async function loadConfig() {
 // Save configuration
 async function saveConfig() {
     const numero = document.getElementById('numero').value.trim();
-    const mensaje = document.getElementById('mensaje').value.trim();
-    const cooldown = parseInt(document.getElementById('cooldown').value) || 5;
     const alertasActivas = document.getElementById('alertas-activas').checked;
     const statusDiv = document.getElementById('config-status');
 
-    if (!numero || !mensaje) {
-        showStatusMessage(statusDiv, 'Por favor complete todos los campos', 'error');
-        return;
+    // Recoger mensajes por nivel
+    const niveles = [3, 4, 5, 6, 8];
+    const mensajes = {};
+    for (const nivel of niveles) {
+        const textarea = document.getElementById(`mensaje-${nivel}`);
+        mensajes[nivel] = textarea ? textarea.value.trim() : '';
+    }
+    
+    // Recoger cooldowns por nivel
+    const cooldowns = {};
+    for (const nivel of niveles) {
+        const input = document.getElementById(`cooldown-${nivel}`);
+        cooldowns[nivel] = input ? parseInt(input.value) || 5 : 5;
     }
 
-    if (cooldown < 1 || cooldown > 60) {
-        showStatusMessage(statusDiv, 'El cooldown debe estar entre 1 y 60 minutos', 'error');
+    if (!numero) {
+        showStatusMessage(statusDiv, 'Por favor ingresa el número de WhatsApp', 'error');
         return;
     }
 
@@ -106,11 +132,12 @@ async function saveConfig() {
             },
             body: JSON.stringify({
                 numero_destino: numero,
-                mensaje: mensaje,
-                cooldown_minutos: cooldown,
                 alertas_activas: alertasActivas,
                 comando_activar: 'activar alertas',
-                comando_desactivar: 'desactivar alertas'
+                comando_desactivar: 'desactivar alertas',
+                mensajes: mensajes,
+                cooldowns: cooldowns,
+                niveles_notificacion: [3, 4, 5, 6]
             })
         });
 

@@ -3,7 +3,7 @@ const mqtt = require('mqtt');
 class MQTTClientHandler {
     constructor(options = {}) {
         this.broker = options.broker || 'mqtt://test.mosquitto.org';
-        this.topic = options.topic || 'alerta/sensor';
+        this.topic = options.topic || 'alerta/canaleta';
         this.clientId = options.clientId || `nodejs-${Math.random().toString(16).slice(2, 8)}`;
         this.client = null;
         this.isConnected = false;
@@ -45,16 +45,20 @@ class MQTTClientHandler {
         });
 
         this.client.on('message', (topic, message) => {
-            const msg = message.toString().trim().toLowerCase();
+            const raw = message.toString().trim();
+            let parsed = null;
             
-            this.lastMessage = { topic, message: msg, timestamp: new Date() };
-            
-            if (msg === 'true') {
-                console.log(`🚨 [MQTT] ALERTA: ${topic} = true`);
+            try {
+                parsed = JSON.parse(raw);
+                console.log(`📡 [MQTT] Status: ${parsed.status} | Hum: ${parsed.humedad} | Dist: ${parsed.distancia}cm`);
+            } catch {
+                console.log(`� [MQTT] Mensaje raw: ${raw}`);
             }
             
+            this.lastMessage = { topic, message: raw, parsed, timestamp: new Date() };
+            
             if (this.messageCallback) {
-                this.messageCallback(topic, msg);
+                this.messageCallback(topic, raw, parsed);
             }
         });
 

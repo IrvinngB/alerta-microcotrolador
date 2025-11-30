@@ -504,34 +504,100 @@
                             </p>
                         </div>
 
-                        <!-- Mensaje -->
+                        <!-- Mensajes por Nivel -->
                         <div>
-                            <label for="mensaje" class="block text-sm font-bold text-gray-700 mb-2">
-                                Mensaje de Alerta
+                            <label class="block text-sm font-bold text-gray-700 mb-4">
+                                Mensajes por Nivel de Alerta
                             </label>
-                            <textarea id="mensaje" rows="5"
-                                placeholder="⚠️ ALERTA: La canaleta está por desbordarse. Revisa y limpia inmediatamente."
-                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-light focus:border-transparent transition-all outline-none text-lg resize-none"></textarea>
-                            <p class="mt-2 text-sm text-gray-500">
-                                Este mensaje se enviará cuando el sensor detecte nivel crítico de agua
+                            <p class="text-sm text-gray-500 mb-4">
+                                Variables disponibles: <code class="bg-gray-100 px-1 rounded">{distancia}</code>, <code class="bg-gray-100 px-1 rounded">{humedad}</code>
                             </p>
-                        </div>
-
-                        <!-- Cooldown -->
-                        <div>
-                            <label for="cooldown" class="block text-sm font-bold text-gray-700 mb-2">
-                                Tiempo entre alertas (minutos)
-                            </label>
-                            <input type="number" id="cooldown" min="1" max="60" value="5"
-                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-light focus:border-transparent transition-all outline-none text-lg">
-                            <p class="mt-2 text-sm text-gray-500">
-                                Tiempo mínimo entre alertas para evitar spam (recomendado: 5-10 minutos)
-                            </p>
-                        </div>
-
-                        <!-- Estado de alertas -->
-                        <div class="bg-blue-50 border-2 border-blue-200 rounded-lg p-4">
-                            <div class="flex items-center justify-between">
+                            
+                            <!-- Nivel 3: Precaución -->
+                            <div class="mb-4 p-4 bg-yellow-50 border-2 border-yellow-200 rounded-lg">
+                                <div class="flex items-center justify-between mb-2">
+                                    <div class="flex items-center">
+                                        <span class="text-xl mr-2">⚠️</span>
+                                        <label for="mensaje-3" class="font-bold text-yellow-800">Nivel 3: Precaución</label>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <label class="text-xs text-yellow-700 mr-2">Cooldown:</label>
+                                        <input type="number" id="cooldown-3" min="1" max="60" value="10"
+                                            class="w-16 px-2 py-1 text-sm border border-yellow-300 rounded focus:ring-1 focus:ring-yellow-400">
+                                        <span class="text-xs text-yellow-700 ml-1">min</span>
+                                    </div>
+                                </div>
+                                <textarea id="mensaje-3" rows="3"
+                                    class="w-full px-3 py-2 border border-yellow-300 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition-all outline-none text-sm resize-none"></textarea>
+                            </div>
+                            
+                            <!-- Nivel 4: Riesgo Alto -->
+                            <div class="mb-4 p-4 bg-orange-50 border-2 border-orange-200 rounded-lg">
+                                <div class="flex items-center justify-between mb-2">
+                                    <div class="flex items-center">
+                                        <span class="text-xl mr-2">🚨</span>
+                                        <label for="mensaje-4" class="font-bold text-orange-800">Nivel 4: Riesgo Alto</label>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <label class="text-xs text-orange-700 mr-2">Cooldown:</label>
+                                        <input type="number" id="cooldown-4" min="1" max="60" value="5"
+                                            class="w-16 px-2 py-1 text-sm border border-orange-300 rounded focus:ring-1 focus:ring-orange-400">
+                                        <span class="text-xs text-orange-700 ml-1">min</span>
+                                    </div>
+                                </div>
+                                <textarea id="mensaje-4" rows="3"
+                                    class="w-full px-3 py-2 border border-orange-300 rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all outline-none text-sm resize-none"></textarea>
+                            </div>
+                            
+                            <!-- Nivel 5: Emergencia -->
+                            <div class="mb-4 p-4 bg-red-50 border-2 border-red-200 rounded-lg">
+                                <div class="flex items-center justify-between mb-2">
+                                    <div class="flex items-center">
+                                        <span class="text-xl mr-2">🆘</span>
+                                        <label for="mensaje-5" class="font-bold text-red-800">Nivel 5: Emergencia</label>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <label class="text-xs text-red-700 mr-2">Cooldown:</label>
+                                        <input type="number" id="cooldown-5" min="1" max="60" value="1"
+                                            class="w-16 px-2 py-1 text-sm border border-red-300 rounded focus:ring-1 focus:ring-red-400">
+                                        <span class="text-xs text-red-700 ml-1">min</span>
+                                    </div>
+                                </div>
+                                <textarea id="mensaje-5" rows="3"
+                                    class="w-full px-3 py-2 border border-red-300 rounded-lg focus:ring-2 focus:ring-red-400 focus:border-transparent transition-all outline-none text-sm resize-none"></textarea>
+                            </div>
+                            
+                            <!-- Nivel 6: Falla Sensor -->
+                            <div class="mb-4 p-4 bg-gray-50 border-2 border-gray-300 rounded-lg">
+                                <div class="flex items-center justify-between mb-2">
+                                    <div class="flex items-center">
+                                        <span class="text-xl mr-2">🔧</span>
+                                        <label for="mensaje-6" class="font-bold text-gray-800">Nivel 6: Falla de Sensor</label>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <label class="text-xs text-gray-600 mr-2">Cooldown:</label>
+                                        <input type="number" id="cooldown-6" min="1" max="60" value="30"
+                                            class="w-16 px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-gray-400">
+                                        <span class="text-xs text-gray-600 ml-1">min</span>
+                                    </div>
+                                </div>
+                                <textarea id="mensaje-6" rows="3"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-400 focus:border-transparent transition-all outline-none text-sm resize-none"></textarea>
+                            </div>
+                            
+                            <!-- Nivel 8: Obstrucción -->
+                            <div class="p-4 bg-amber-50 border-2 border-amber-300 rounded-lg">
+                                <div class="flex items-center justify-between mb-2">
+                                    <div class="flex items-center">
+                                        <span class="text-xl mr-2">🚧</span>
+                                        <label for="mensaje-8" class="font-bold text-amber-800">Nivel 8: Obstrucción</label>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <label class="text-xs text-amber-700 mr-2">Cooldown:</label>
+                                        <input type="number" id="cooldown-8" min="1" max="60" value="15"
+                                            class="w-16 px-2 py-1 text-sm border border-amber-300 rounded focus:ring-1 focus:ring-amber-400">
+                                        <span class="text-xs text-amber-700 ml-1">min</span>
+                                    </div>
                                 <div>
                                     <h4 class="font-bold text-gray-800 mb-1">Estado de Alertas</h4>
                                     <p class="text-sm text-gray-600">Activa o desactiva las notificaciones</p>
@@ -601,20 +667,6 @@
                         <div class="inline-block p-4 bg-primary-light/10 rounded-full mb-4">
                             <svg class="w-16 h-16 text-primary-light" fill="none" stroke="currentColor"
                                 viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z">
-                                </path>
-                            </svg>
-                        </div>
-                        <h2 class="text-4xl font-bold text-primary-dark mb-2">Vincular WhatsApp</h2>
-                        <p class="text-gray-600">Conecta tu cuenta de WhatsApp para recibir las alertas de desborde</p>
-                    </div>
-
-                    <!-- Status Badge -->
-                    <div class="flex justify-center mb-8">
-                        <div id="status-badge"
-                            class="px-6 py-3 rounded-full font-bold text-white flex items-center space-x-2 shadow-lg">
-                            <span id="status-dot" class="w-3 h-3 rounded-full animate-pulse"></span>
                             <span id="status-text">Verificando...</span>
                         </div>
                     </div>
@@ -730,6 +782,80 @@
                                 <code class="block bg-blue-100 text-blue-800 px-3 py-2 rounded-lg font-mono text-sm mb-3">estado</code>
                                 <p class="text-gray-600 text-sm">Muestra el estado actual del sistema, configuración de cooldown y comandos disponibles.</p>
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- Niveles de Alerta -->
+                    <div class="mb-10">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                            <svg class="w-7 h-7 mr-3 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                            </svg>
+                            Niveles de Alerta
+                        </h3>
+                        <p class="text-gray-600 mb-6">El sistema detecta 7 niveles según los sensores de distancia y humedad:</p>
+
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm">
+                                <thead>
+                                    <tr class="bg-gray-100">
+                                        <th class="px-4 py-3 text-left font-bold text-gray-700">Nivel</th>
+                                        <th class="px-4 py-3 text-left font-bold text-gray-700">Estado</th>
+                                        <th class="px-4 py-3 text-left font-bold text-gray-700">Condición</th>
+                                        <th class="px-4 py-3 text-left font-bold text-gray-700">Acción</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200">
+                                    <tr class="bg-green-50">
+                                        <td class="px-4 py-3 font-bold text-green-700">1</td>
+                                        <td class="px-4 py-3">Normal</td>
+                                        <td class="px-4 py-3 text-gray-600">Todo ok</td>
+                                        <td class="px-4 py-3 text-gray-500">Solo registro</td>
+                                    </tr>
+                                    <tr class="bg-blue-50">
+                                        <td class="px-4 py-3 font-bold text-blue-700">2</td>
+                                        <td class="px-4 py-3">Lluvia leve</td>
+                                        <td class="px-4 py-3 text-gray-600">Nivel 10-15cm</td>
+                                        <td class="px-4 py-3 text-gray-500">Solo registro</td>
+                                    </tr>
+                                    <tr class="bg-yellow-50">
+                                        <td class="px-4 py-3 font-bold text-yellow-700">3</td>
+                                        <td class="px-4 py-3">⚠️ Acumulación</td>
+                                        <td class="px-4 py-3 text-gray-600">Nivel 6-10cm</td>
+                                        <td class="px-4 py-3 font-semibold text-yellow-700">Notificación</td>
+                                    </tr>
+                                    <tr class="bg-orange-50">
+                                        <td class="px-4 py-3 font-bold text-orange-700">4</td>
+                                        <td class="px-4 py-3">🚨 Riesgo</td>
+                                        <td class="px-4 py-3 text-gray-600">Nivel < 8cm</td>
+                                        <td class="px-4 py-3 font-semibold text-orange-700">Notificación</td>
+                                    </tr>
+                                    <tr class="bg-red-50">
+                                        <td class="px-4 py-3 font-bold text-red-700">5</td>
+                                        <td class="px-4 py-3">🆘 Emergencia</td>
+                                        <td class="px-4 py-3 text-gray-600">Nivel < 5cm + humedad alta</td>
+                                        <td class="px-4 py-3 font-semibold text-red-700">Notificación urgente</td>
+                                    </tr>
+                                    <tr class="bg-gray-100">
+                                        <td class="px-4 py-3 font-bold text-gray-700">6</td>
+                                        <td class="px-4 py-3">🔧 Falla sensor</td>
+                                        <td class="px-4 py-3 text-gray-600">Datos imposibles</td>
+                                        <td class="px-4 py-3 font-semibold text-gray-700">Notificación técnica</td>
+                                    </tr>
+                                    <tr class="bg-purple-50">
+                                        <td class="px-4 py-3 font-bold text-purple-700">7</td>
+                                        <td class="px-4 py-3">Mantenimiento</td>
+                                        <td class="px-4 py-3 text-gray-600">Manual</td>
+                                        <td class="px-4 py-3 text-gray-500">Desactiva alertas</td>
+                                    </tr>
+                                    <tr class="bg-amber-50">
+                                        <td class="px-4 py-3 font-bold text-amber-700">8</td>
+                                        <td class="px-4 py-3">🚧 Obstrucción</td>
+                                        <td class="px-4 py-3 text-gray-600">Nivel alto + humedad baja</td>
+                                        <td class="px-4 py-3 font-semibold text-amber-700">Notificación</td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
 
