@@ -1,15 +1,15 @@
 {
-  "numero_destino": "+50763615832",
+  "numero_destino": "+50761732332",
   "cooldown_minutos": 1,
   "alertas_activas": true,
   "comando_activar": "activar alertas",
   "comando_desactivar": "desactivar alertas",
   "mensajes": {
-    "3": "⚠️ *ACUMULACIÓN*\n\nEl nivel de agua está subiendo.\n\n📏 Distancia: {distancia}cm\n💧 Humedad: {humedad}\n\n_Mantente atento._",
-    "4": "🚨 *RIESGO*\n\n¡Nivel de agua alto!\n\n📏 Distancia: {distancia}cm\n💧 Humedad: {humedad}\n\n_Revisa la canaleta._",
-    "5": "🆘 *EMERGENCIA*\n\n¡NIVEL CRÍTICO!\n\n📏 Distancia: {distancia}cm\n💧 Humedad: {humedad}\n\n_¡Acción inmediata!_",
-    "6": "🔧 *FALLA SENSOR*\n\nDatos imposibles detectados.\n\n📏 Distancia: {distancia}cm\n💧 Humedad: {humedad}\n\n_Verifica el hardware._",
-    "8": "🚧 *OBSTRUCCIÓN*\n\nNivel alto pero humedad baja.\n\n📏 Distancia: {distancia}cm\n💧 Humedad: {humedad}\n\n_Posible bloqueo en la canaleta._"
+    "3": "*ALERTA: ACUMULACIÓN DETECTADA*\n\nEl nivel de agua está aumentando\n\n📏 Nivel de la canaleta: {distancia}cm\n💧 Humedad prepotente de la lluvia: {humedad}\n\nMantente atento y continúa monitoreando.",
+    "4": "*ALERTA DE RIESGO: NIVEL DE AGUA ELEVADO*\n\nLa acumulación alcanza un punto preocupante\n\n📏 Nivel de la canaleta: {distancia}cm\n💧 Humedad prepotente de la lluvia: {humedad}\n\nRevisa la canaleta.",
+    "5": "🆘 *ALERTA CRÍTICA: NIVEL DE AGUA EXTREMO*\n\nSe detecta un nivel crítico que requiere acción inmediata\n\n📏 Nivel de la canaleta: {distancia}cm\n💧 Humedad prepotente de la lluvia: {humedad}\n\nIntervención urgente requerida.",
+    "6": "🔧 *FALLA SENSOR*\n\nDatos imposibles detectados.\n\n📏 Nivel de la canaleta: {distancia}cm\n💧 Humedad prepotente de la lluvia: {humedad}\n\n_Verifica el hardware._",
+    "8": "🚧 *OBSTRUCCIÓN*\n\nNivel alto pero humedad baja.\n\n📏 Nivel de la canaleta: {distancia}cm\n💧 Humedad prepotente de la lluvia: {humedad}\n\n_Posible bloqueo en la canaleta._"
   },
   "cooldowns": {
     "3": 10,
