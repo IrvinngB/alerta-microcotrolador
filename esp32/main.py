@@ -2,8 +2,8 @@ from umqtt.simple import MQTTClient
 from machine import Pin, ADC, time_pulse_us
 import time, network, ujson
 
-SSID = "Starlink Web"
-PASSWORD = "wrpnaTDD0426"
+SSID = "HONOR X7b"#"Starlink Web"
+PASSWORD = "11111111"#"wrpnaTDD0426"
 
 BROKER = "test.mosquitto.org"
 PORT = 1883
@@ -54,28 +54,20 @@ def send_payload(status, humedad, distancia):
 
 connect_wifi()
 
+d = medir_distancia()
+while d == -1:
+    d = medir_distancia()
 while True:
     h = sensor.read()
-    d = medir_distancia()
+    ob = medir_distancia()
 
-    print("HUM:", h, "| DIST:", d)
+    print("HUM:", h, "| DIST:", d, "| OBS:", ob)
 
-    if d == -1:
-        status = 6
-    elif d < 8 and h < 400:
-        status = 8
-    elif h > 1200:
-        status = 5
-    elif d < 5:
-        status = 4
-    elif 5 <= d < 10:
-        status = 3
-    elif 10 <= d < 15:
-        status = 2
-    else:
-        status = 1
-
-    print("STATUS:", status)
-    send_payload(status, h, d)
+    if h != 0:
+        if ob < d:
+            status = 3
+            print("STATUS:", status)
+            send_payload(status, h, ob)
 
     time.sleep(1)
+
