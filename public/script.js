@@ -137,7 +137,7 @@ async function saveConfig() {
                 comando_desactivar: 'desactivar alertas',
                 mensajes: mensajes,
                 cooldowns: cooldowns,
-                niveles_notificacion: [3, 4, 5, 6]
+                niveles_notificacion: [3, 4, 5, 6, 8]
             })
         });
 

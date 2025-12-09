@@ -1,38 +1,52 @@
-# Usar Node.js 18 LTS en Alpine para imagen ligera
-FROM node:18-alpine
+# Imagen base de Puppeteer con Chrome y dependencias
+FROM ghcr.io/puppeteer/puppeteer:21.5.2
 
-# Instalar dependencias necesarias para Puppeteer/Chromium en Linux
-RUN apk add --no-cache \
-    chromium \
-    nss \
-    freetype \
-    harfbuzz \
-    ca-certificates \
-    ttf-freefont \
-    nodejs \
-    yarn
+WORKDIR /usr/src/app
 
-# Configurar Puppeteer para usar Chromium instalado
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
-    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+USER root
 
-# Crear directorio de la aplicación
-WORKDIR /app
+# Elimina archivos de configuración conflictivos de Google Chrome
+RUN rm -f /etc/apt/sources.list.d/google-chrome.list /etc/apt/sources.list.d/google.list
 
-# Copiar archivos de dependencias
+# Instala dependencias adicionales
+RUN apt-get update && apt-get install -y \
+    xvfb \
+    libgbm-dev \
+    procps \
+    htop \
+    net-tools \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copia archivos de dependencias
 COPY package*.json ./
 
-# Instalar dependencias de producción
-RUN npm ci --omit=dev
+# Instala dependencias de Node.js
+RUN npm install
 
-# Copiar el resto de la aplicación
+# Instala PM2 globalmente
+RUN npm install pm2 -g
+
+# Copia el código fuente
 COPY . .
 
-# Crear directorio para sesiones de WhatsApp
-RUN mkdir -p /app/sessions && chmod 777 /app/sessions
+# Variables de entorno
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable \
+    NODE_OPTIONS="--max-old-space-size=512" \
+    CHROMIUM_FLAGS="--disable-dev-shm-usage --no-sandbox --disable-gpu --disable-software-rasterizer --js-flags='--expose-gc'" \
+    MAX_RECONNECT_ATTEMPTS=10 \
+    RECONNECT_DELAY=10000 \
+    HEALTH_CHECK_INTERVAL=120000
 
-# Exponer puerto
+# Crea directorio para sesión de WhatsApp
+RUN mkdir -p .wwebjs_auth/session-client \
+    && mkdir -p sessions \
+    && chown -R pptruser:pptruser .wwebjs_auth \
+    && chown -R pptruser:pptruser sessions
+
 EXPOSE 3000
 
-# Comando para iniciar la aplicación
-CMD ["node", "index.js"]
+USER pptruser
+
+# Inicia con PM2
+CMD ["pm2-runtime", "index.js"]

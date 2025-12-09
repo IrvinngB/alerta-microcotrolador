@@ -586,7 +586,7 @@
                             </div>
                             
                             <!-- Nivel 8: Obstrucción -->
-                            <div class="p-4 bg-amber-50 border-2 border-amber-300 rounded-lg">
+                            <div class="mb-4 p-4 bg-amber-50 border-2 border-amber-300 rounded-lg">
                                 <div class="flex items-center justify-between mb-2">
                                     <div class="flex items-center">
                                         <span class="text-xl mr-2">🚧</span>
@@ -598,15 +598,22 @@
                                             class="w-16 px-2 py-1 text-sm border border-amber-300 rounded focus:ring-1 focus:ring-amber-400">
                                         <span class="text-xs text-amber-700 ml-1">min</span>
                                     </div>
-                                <div>
-                                    <h4 class="font-bold text-gray-800 mb-1">Estado de Alertas</h4>
-                                    <p class="text-sm text-gray-600">Activa o desactiva las notificaciones</p>
                                 </div>
-                                <label class="relative inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" id="alertas-activas" class="sr-only peer" checked>
-                                    <div class="w-14 h-7 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-blue-600"></div>
-                                </label>
+                                <textarea id="mensaje-8" rows="3"
+                                    class="w-full px-3 py-2 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent transition-all outline-none text-sm resize-none"></textarea>
                             </div>
+                        </div>
+
+                        <!-- Estado de Alertas -->
+                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                            <div>
+                                <h4 class="font-bold text-gray-800 mb-1">Estado de Alertas</h4>
+                                <p class="text-sm text-gray-600">Activa o desactiva las notificaciones</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="alertas-activas" class="sr-only peer" checked>
+                                <div class="w-14 h-7 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-blue-600"></div>
+                            </label>
                         </div>
 
                         <!-- Comandos de WhatsApp -->
@@ -793,7 +800,7 @@
                             </svg>
                             Niveles de Alerta
                         </h3>
-                        <p class="text-gray-600 mb-6">El sistema detecta 7 niveles según los sensores de distancia y humedad:</p>
+                        <p class="text-gray-600 mb-6">El sistema detecta 8 niveles según los sensores de distancia y humedad:</p>
 
                         <div class="overflow-x-auto">
                             <table class="w-full text-sm">

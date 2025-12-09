@@ -458,7 +458,7 @@ mqttClient.onMessage(async (topic, raw, parsed) => {
     
     try {
         const config = readConfig();
-        const nivelesNotificacion = config.niveles_notificacion || [3, 4, 5, 6];
+        const nivelesNotificacion = config.niveles_notificacion || [3, 4, 5, 6, 8];
         
         if (!nivelesNotificacion.includes(status)) {
             return;
