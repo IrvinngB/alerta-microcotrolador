@@ -22,7 +22,6 @@ let qrCodeData = null;
 let isClientReady = false;
 let client = null;
 let qrAttempts = 0;
-const MAX_QR_ATTEMPTS = 5;
 
 // Inicializar optimizador de memoria (límites estrictos para Render 512MB)
 const memoryOptimizer = new MemoryOptimizer({
@@ -87,15 +86,10 @@ const initializeWhatsAppClient = () => {
         }
     });
 
-    // Evento: QR generado
+    // Evento: QR generado (sin límite, siempre genera nuevo QR)
     client.on('qr', async (qr) => {
         qrAttempts++;
-        console.log(`📱 QR Code generado (intento ${qrAttempts}/${MAX_QR_ATTEMPTS})`);
-        
-        if (qrAttempts > MAX_QR_ATTEMPTS) {
-            console.log('⚠️ Demasiados intentos de QR. Reinicia el servidor para generar uno nuevo.');
-            return;
-        }
+        console.log(`📱 QR Code generado (#${qrAttempts})`);
         
         try {
             qrCodeData = await qrcode.toDataURL(qr);
@@ -273,8 +267,7 @@ app.get('/qr', (req, res) => {
             success: true,
             qr: qrCodeData,
             connected: false,
-            qrAttempts: qrAttempts,
-            maxAttempts: MAX_QR_ATTEMPTS
+            qrAttempts: qrAttempts
         });
     }
 
@@ -282,8 +275,7 @@ app.get('/qr', (req, res) => {
         success: false,
         message: 'QR no disponible aún. Espere unos segundos...',
         connected: false,
-        qrAttempts: qrAttempts,
-        maxAttempts: MAX_QR_ATTEMPTS
+        qrAttempts: qrAttempts
     });
 });
 
@@ -362,22 +354,26 @@ app.post('/event', async (req, res) => {
     }
 
     try {
-        // Leer configuración
         const config = readConfig();
 
-        if (!config.numero_destino || !config.mensaje) {
+        if (!config.numero_destino) {
             return res.status(400).json({
                 success: false,
-                error: 'Configuración incompleta. Configure número y mensaje primero.'
+                error: 'Configure el número de destino primero.'
             });
         }
 
-        // Enviar mensaje
-        await sendWhatsAppMessage(config.numero_destino, config.mensaje);
+        // Usar mensaje de prueba o el mensaje del nivel 3
+        const mensajePrueba = config.mensajes?.[3] || '🧪 *MENSAJE DE PRUEBA*\n\nEl sistema HydroWatch está funcionando correctamente.';
+        const mensajeFormateado = mensajePrueba
+            .replace('{distancia}', '15')
+            .replace('{humedad}', '75%');
+
+        await sendWhatsAppMessage(config.numero_destino, mensajeFormateado);
 
         res.json({
             success: true,
-            message: 'Alerta enviada correctamente',
+            message: 'Mensaje de prueba enviado correctamente',
             numero: config.numero_destino
         });
     } catch (error) {
@@ -396,22 +392,26 @@ app.get('/config', (req, res) => {
 
 // POST /config - Actualizar configuración
 app.post('/config', (req, res) => {
-    const { numero_destino, mensaje, cooldown_minutos, alertas_activas, comando_activar, comando_desactivar } = req.body;
+    const { numero_destino, mensajes, cooldowns, alertas_activas, comando_activar, comando_desactivar, niveles_notificacion } = req.body;
 
-    if (!numero_destino || !mensaje) {
+    if (!numero_destino) {
         return res.status(400).json({
             success: false,
-            error: 'Faltan parámetros: numero_destino y mensaje son requeridos'
+            error: 'Falta el número de destino'
         });
     }
 
+    const currentConfig = readConfig();
+    
     const config = { 
+        ...currentConfig,
         numero_destino, 
-        mensaje,
-        cooldown_minutos: cooldown_minutos || 5,
+        mensajes: mensajes || currentConfig.mensajes || {},
+        cooldowns: cooldowns || currentConfig.cooldowns || {},
         alertas_activas: alertas_activas !== false,
         comando_activar: comando_activar || 'activar alertas',
-        comando_desactivar: comando_desactivar || 'desactivar alertas'
+        comando_desactivar: comando_desactivar || 'desactivar alertas',
+        niveles_notificacion: niveles_notificacion || currentConfig.niveles_notificacion || [3, 4, 5, 6, 8]
     };
     const saved = saveConfig(config);
 

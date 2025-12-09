@@ -18,5 +18,11 @@
     "6": 30,
     "8": 15
   },
-  "niveles_notificacion": [3, 4, 5, 6, 8]
+  "niveles_notificacion": [
+    3,
+    4,
+    5,
+    6,
+    8
+  ]
 }

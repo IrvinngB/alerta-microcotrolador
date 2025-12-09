@@ -226,7 +226,7 @@ async function loadQR() {
             
             lastQRCode = data.qr;
             
-            const attemptInfo = data.qrAttempts ? `<div class="mb-3 px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm font-medium">📱 QR #${data.qrAttempts} de ${data.maxAttempts}</div>` : '';
+            const attemptInfo = data.qrAttempts ? `<div class="mb-3 px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm font-medium">📱 QR #${data.qrAttempts}</div>` : '';
             
             qrContainer.innerHTML = `
                 <div class="text-center">
