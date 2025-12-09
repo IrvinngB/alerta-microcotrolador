@@ -226,19 +226,26 @@ async function loadQR() {
             
             lastQRCode = data.qr;
             
+            const attemptInfo = data.qrAttempts ? `<div class="mb-3 px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm font-medium">📱 QR #${data.qrAttempts} de ${data.maxAttempts}</div>` : '';
+            
             qrContainer.innerHTML = `
                 <div class="text-center">
+                    ${attemptInfo}
                     ${qrChanged ? '<div class="mb-4 px-4 py-2 bg-blue-100 text-blue-800 rounded-lg font-semibold animate-pulse">🔄 Nuevo código QR generado</div>' : ''}
                     <img src="${data.qr}" alt="Código QR de WhatsApp" class="max-w-full h-auto rounded-lg shadow-lg transition-all duration-300">
                     <p class="text-gray-600 text-sm mt-3">Escanea este código con WhatsApp</p>
                 </div>
             `;
         } else {
+            const waitingInfo = data.qrAttempts > 0 
+                ? `<p class="text-gray-500 text-sm mt-2">QR anterior expiró. Generando #${data.qrAttempts + 1}...</p>`
+                : `<p class="text-gray-500 text-sm mt-2">Esto puede tomar unos segundos</p>`;
+            
             qrContainer.innerHTML = `
                 <div class="text-center">
                     <div class="inline-block animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-whatsapp-light mb-4"></div>
                     <p class="text-gray-600 font-semibold">Generando código QR...</p>
-                    <p class="text-gray-500 text-sm mt-2">Esto puede tomar unos segundos</p>
+                    ${waitingInfo}
                 </div>
             `;
         }

@@ -52,7 +52,7 @@ const initializeWhatsAppClient = () => {
         authStrategy: new LocalAuth({
             dataPath: './sessions'
         }),
-        qrMaxRetries: 3,
+        qrMaxRetries: 0,
         authTimeoutMs: 120000,
         puppeteer: {
             headless: true,
@@ -114,11 +114,24 @@ const initializeWhatsAppClient = () => {
         memoryOptimizer.optimizeWhatsAppClient(client);
     });
 
-    // Evento: Desconexión
-    client.on('disconnected', (reason) => {
+    // Evento: Desconexión - reiniciar automáticamente
+    client.on('disconnected', async (reason) => {
         console.log('❌ Cliente desconectado:', reason);
         isClientReady = false;
         qrCodeData = null;
+        
+        // Reiniciar cliente automáticamente
+        console.log('🔄 Reiniciando cliente en 5 segundos...');
+        setTimeout(async () => {
+            try {
+                qrAttempts = 0;
+                await client.destroy().catch(() => {});
+                client.initialize();
+                console.log('🔄 Cliente reiniciado');
+            } catch (err) {
+                console.error('Error reiniciando cliente:', err);
+            }
+        }, 5000);
     });
 
     // Evento: Error de autenticación
@@ -152,19 +165,6 @@ const initializeWhatsAppClient = () => {
     // Evento: Autenticación exitosa
     client.on('authenticated', () => {
         console.log('🔐 Autenticación exitosa');
-    });
-
-    // Evento: Desconexión
-    client.on('disconnected', (reason) => {
-        console.log('❌ Cliente desconectado:', reason);
-        isClientReady = false;
-        qrCodeData = null;
-    });
-
-    // Evento: Error de autenticación
-    client.on('auth_failure', (msg) => {
-        console.error('❌ Error de autenticación:', msg);
-        isClientReady = false;
     });
 
     // Inicializar cliente
@@ -263,7 +263,8 @@ app.get('/qr', (req, res) => {
         return res.json({
             success: true,
             connected: true,
-            message: 'WhatsApp ya está conectado'
+            message: 'WhatsApp ya está conectado',
+            qrAttempts: qrAttempts
         });
     }
 
@@ -271,14 +272,18 @@ app.get('/qr', (req, res) => {
         return res.json({
             success: true,
             qr: qrCodeData,
-            connected: false
+            connected: false,
+            qrAttempts: qrAttempts,
+            maxAttempts: MAX_QR_ATTEMPTS
         });
     }
 
     return res.json({
         success: false,
         message: 'QR no disponible aún. Espere unos segundos...',
-        connected: false
+        connected: false,
+        qrAttempts: qrAttempts,
+        maxAttempts: MAX_QR_ATTEMPTS
     });
 });
 
