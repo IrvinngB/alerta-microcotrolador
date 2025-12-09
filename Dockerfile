@@ -38,11 +38,13 @@ ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
     RECONNECT_DELAY=10000 \
     HEALTH_CHECK_INTERVAL=120000
 
-# Crea directorio para sesión de WhatsApp
+# Crea directorios y asigna permisos
 RUN mkdir -p .wwebjs_auth/session-client \
     && mkdir -p sessions \
     && chown -R pptruser:pptruser .wwebjs_auth \
-    && chown -R pptruser:pptruser sessions
+    && chown -R pptruser:pptruser sessions \
+    && chown pptruser:pptruser config.json \
+    && chmod 666 config.json
 
 EXPOSE 3000
 

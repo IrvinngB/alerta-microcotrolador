@@ -212,10 +212,14 @@ const readConfig = () => {
 const saveConfig = (config) => {
     try {
         const configPath = path.join(__dirname, 'config.json');
+        console.log('💾 Guardando config en:', configPath);
         fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
+        console.log('✅ Config guardada correctamente');
         return true;
     } catch (error) {
-        console.error('Error guardando config.json:', error);
+        console.error('❌ Error guardando config.json:', error.message);
+        console.error('📁 Path:', path.join(__dirname, 'config.json'));
+        console.error('🔐 Permisos:', error.code);
         return false;
     }
 };
